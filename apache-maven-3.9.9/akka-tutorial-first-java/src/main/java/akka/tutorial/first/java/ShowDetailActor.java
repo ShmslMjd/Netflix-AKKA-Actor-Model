@@ -50,7 +50,7 @@ public class ShowDetailActor extends AbstractActor {
 
     private void playEpisode(String showName) {
         System.out.println("Playing: " + showName);
-        // Simulate playback controls (e.g., pause, rewind, etc.)
+        // Simulate playback controls (others will do it)
     }
 
     private void likeUnlike(String showName) {

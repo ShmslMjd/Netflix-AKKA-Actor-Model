@@ -82,12 +82,12 @@ public class SettingActor extends AbstractActor {
 
     private void viewBills() {
         System.out.println("Viewing bills...");
-        // Display bills (placeholder implementation).
+        // Display bills (others will do it).
     }
 
     private void payBills() {
         System.out.println("Paying bills...");
-        // Simulate bill payment (placeholder implementation).
+        // Simulate bill payment (others will do it).
     }
 
     private void addPaymentMethod() {
