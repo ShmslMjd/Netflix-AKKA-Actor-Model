@@ -41,7 +41,7 @@ public class ShowDetailActor extends AbstractActor {
             if (userList.contains(showName)) {
                 System.out.println("3. Remove from List");
             } else {
-                System.out.println("3. Add to List");
+                System.out.println("3. Add to Watch List");
             }
             System.out.println("4. Go Back to Home");
             System.out.print("Enter your choice: ");
@@ -117,10 +117,10 @@ public class ShowDetailActor extends AbstractActor {
     private void toggleList(String showName) {
         if (userList.contains(showName)) {
             userList.remove(showName);
-            System.out.println(showName + " has been removed from your list.");
+            System.out.println(showName + " has been removed from your watch list.");
         } else {
             userList.add(showName);
-            System.out.println(showName + " has been added to your list.");
+            System.out.println(showName + " has been added to your watch list.");
         }
     }
 
