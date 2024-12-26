@@ -33,7 +33,7 @@ public class SettingActor extends AbstractActor {
         System.out.println("\n--- Settings ---");
         System.out.println("1. Billing");
         System.out.println("2. User Profiles");
-        System.out.println("3. Back to Home");
+        System.out.println("3. Back to Home Menu");
         System.out.print("Enter your choice: ");
 
         Scanner scanner = new Scanner(System.in);
@@ -47,11 +47,12 @@ public class SettingActor extends AbstractActor {
                 manageProfiles();
                 break;
             case 3:
-                System.out.println("Returning to Home...");
-                getContext().stop(getSelf());
+                System.out.println("Returning to Home Menu...");
+                getSender().tell("start", getSelf()); // Notify HomeActor to show the menu
                 break;
             default:
                 System.out.println("Invalid choice. Try again.");
+                displaySettingsMenu(); // Redisplay settings menu for invalid input
         }
     }
 
@@ -82,12 +83,12 @@ public class SettingActor extends AbstractActor {
 
     private void viewBills() {
         System.out.println("Viewing bills...");
-        // Display bills (others will do it).
+        // Display bills (placeholder implementation).
     }
 
     private void payBills() {
         System.out.println("Paying bills...");
-        // Simulate bill payment (others will do it).
+        // Simulate bill payment (placeholder implementation).
     }
 
     private void addPaymentMethod() {

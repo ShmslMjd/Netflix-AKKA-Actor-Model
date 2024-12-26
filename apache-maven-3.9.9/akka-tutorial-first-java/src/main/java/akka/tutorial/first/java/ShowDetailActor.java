@@ -4,12 +4,13 @@ import akka.actor.AbstractActor;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 public class ShowDetailActor extends AbstractActor {
-    private final List<String> userList = new ArrayList<>();
+    private final Set<String> likedVideos = new HashSet<>();
+    private final Set<String> userList = new HashSet<>();
 
     @Override
     public Receive createReceive() {
@@ -19,50 +20,107 @@ public class ShowDetailActor extends AbstractActor {
     }
 
     private void processShowDetail(String showName) {
-        System.out.println("\n--- Show Details for: " + showName + " ---");
-        System.out.println("1. Play Episode");
-        System.out.println("2. Like/Unlike");
-        System.out.println("3. Add to List");
-        System.out.println("4. Go Back to Home");
-        System.out.print("Enter your choice: ");
+        boolean isTvShow = isTvShow(showName);
 
-        Scanner scanner = new Scanner(System.in);
-        int choice = scanner.nextInt();
+        String selectedEpisode = null;
+        if (isTvShow) {
+            selectedEpisode = selectEpisode(showName);
+        }
 
-        switch (choice) {
-            case 1:
-                playEpisode(showName);
-                break;
-            case 2:
-                likeUnlike(showName);
-                break;
-            case 3:
-                addToList(showName);
-                break;
-            case 4:
-                System.out.println("Returning to Home...");
-                getContext().stop(getSelf());
-                break;
-            default:
-                System.out.println("Invalid choice. Try again.");
+        while (true) {
+            System.out.println("\n--- Details for: " + showName + " ---");
+            if (isTvShow && selectedEpisode != null) {
+                System.out.println("Selected Episode: " + selectedEpisode);
+            }
+            System.out.println("1. Play");
+            if (likedVideos.contains(showName)) {
+                System.out.println("2. Unlike");
+            } else {
+                System.out.println("2. Like");
+            }
+            if (userList.contains(showName)) {
+                System.out.println("3. Remove from List");
+            } else {
+                System.out.println("3. Add to List");
+            }
+            System.out.println("4. Go Back to Home");
+            System.out.print("Enter your choice: ");
+
+            Scanner scanner = new Scanner(System.in);
+            int choice = scanner.nextInt();
+
+            switch (choice) {
+                case 1:
+                    playContent(showName, selectedEpisode);
+                    break;
+                case 2:
+                    toggleLike(showName);
+                    break;
+                case 3:
+                    toggleList(showName);
+                    break;
+                case 4:
+                    getSender().tell("start", getSelf());
+                    return; // Exit loop and return to HomeActor
+                default:
+                    System.out.println("Invalid choice. Try again.");
+            }
         }
     }
 
-    private void playEpisode(String showName) {
-        System.out.println("Playing: " + showName);
-        // Simulate playback controls (others will do it)
+    private boolean isTvShow(String showName) {
+        // Identify whether the content is a TV show. Add more TV shows here as needed.
+        return "Series B".equalsIgnoreCase(showName);
     }
 
-    private void likeUnlike(String showName) {
-        System.out.println("Liked/Unliked: " + showName);
+    private String selectEpisode(String showName) {
+        System.out.println("\n--- Select an Episode for: " + showName + " ---");
+        System.out.println("1. Episode 1");
+        System.out.println("2. Episode 2");
+        System.out.println("3. Episode 3");
+        System.out.print("Enter your choice: ");
+
+        Scanner scanner = new Scanner(System.in);
+        int episodeChoice = scanner.nextInt();
+
+        switch (episodeChoice) {
+            case 1:
+                return "Episode 1";
+            case 2:
+                return "Episode 2";
+            case 3:
+                return "Episode 3";
+            default:
+                System.out.println("Invalid episode choice. Defaulting to Episode 1.");
+                return "Episode 1";
+        }
     }
 
-    private void addToList(String showName) {
-        if (!userList.contains(showName)) {
-            userList.add(showName);
-            System.out.println(showName + " added to your list.");
+    private void playContent(String showName, String episode) {
+        if (episode != null) {
+            System.out.println("Playing: " + showName + " - " + episode);
         } else {
-            System.out.println(showName + " is already in your list.");
+            System.out.println("Playing: " + showName);
+        }
+    }
+
+    private void toggleLike(String showName) {
+        if (likedVideos.contains(showName)) {
+            likedVideos.remove(showName);
+            System.out.println(showName + " has been unliked.");
+        } else {
+            likedVideos.add(showName);
+            System.out.println(showName + " has been liked.");
+        }
+    }
+
+    private void toggleList(String showName) {
+        if (userList.contains(showName)) {
+            userList.remove(showName);
+            System.out.println(showName + " has been removed from your list.");
+        } else {
+            userList.add(showName);
+            System.out.println(showName + " has been added to your list.");
         }
     }
 

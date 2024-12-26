@@ -9,45 +9,52 @@ import java.util.Scanner;
 
 public class HomeActor extends AbstractActor {
     private final ActorRef showDetailActor;
-    private final ActorRef settingsActor;
+    private final ActorRef settingActor;
 
-    public HomeActor(ActorRef showDetailActor, ActorRef settingsActor) {
+    public HomeActor(ActorRef showDetailActor, ActorRef settingActor) {
         this.showDetailActor = showDetailActor;
-        this.settingsActor = settingsActor;
+        this.settingActor = settingActor;
     }
 
     @Override
     public Receive createReceive() {
         return ReceiveBuilder.create()
-            .match(String.class, this::displayHomeMenu)
+            .match(String.class, this::processMessage)
             .build();
     }
 
-    private void displayHomeMenu(String message) {
-        while (true) {
-            System.out.println("\n--- Home Menu ---");
-            System.out.println("1. Video Recommendations");
-            System.out.println("2. Settings");
-            System.out.println("3. Exit");
-            System.out.print("Enter your choice: ");
+    private void processMessage(String message) {
+        if ("start".equalsIgnoreCase(message)) {
+            displayHomeMenu();
+        } else {
+            System.out.println("Unrecognized message: " + message);
+        }
+    }
 
-            Scanner scanner = new Scanner(System.in);
-            int choice = scanner.nextInt();
+    private void displayHomeMenu() {
+        System.out.println("\n--- Home Menu ---");
+        System.out.println("1. Video Recommendations");
+        System.out.println("2. Settings");
+        System.out.println("3. Exit");
+        System.out.print("Enter your choice: ");
 
-            switch (choice) {
-                case 1:
-                    displayRecommendations();
-                    break;
-                case 2:
-                    displaySettings();
-                    break;
-                case 3:
-                    System.out.println("Exiting... Goodbye!");
-                    getContext().getSystem().terminate();
-                    return;
-                default:
-                    System.out.println("Invalid choice. Try again.");
-            }
+        Scanner scanner = new Scanner(System.in);
+        int choice = scanner.nextInt();
+
+        switch (choice) {
+            case 1:
+                displayRecommendations();
+                break;
+            case 2:
+                settingActor.tell("open", getSelf());
+                break;
+            case 3:
+                System.out.println("Exiting... Goodbye!");
+                getContext().getSystem().terminate();
+                break;
+            default:
+                System.out.println("Invalid choice. Returning to Home Menu...");
+                selfTellStart();
         }
     }
 
@@ -72,36 +79,16 @@ public class HomeActor extends AbstractActor {
                 showDetailActor.tell("Documentary C", getSelf());
                 break;
             default:
-                System.out.println("Invalid choice. Returning to Home Menu.");
+                System.out.println("Invalid choice. Returning to Home Menu...");
+                selfTellStart();
         }
     }
 
-    private void displaySettings() {
-        System.out.println("\n--- Settings ---");
-        System.out.println("1. Billing");
-        System.out.println("2. User Profiles");
-        System.out.println("3. Back to Home Menu");
-        System.out.print("Enter your choice: ");
-
-        Scanner scanner = new Scanner(System.in);
-        int choice = scanner.nextInt();
-
-        switch (choice) {
-            case 1:
-                settingsActor.tell("billing", getSelf());
-                break;
-            case 2:
-                settingsActor.tell("profiles", getSelf());
-                break;
-            case 3:
-                System.out.println("Returning to Home Menu...");
-                return;
-            default:
-                System.out.println("Invalid choice. Try again.");
-        }
+    private void selfTellStart() {
+        getSelf().tell("start", getSelf());
     }
 
-    public static Props props(ActorRef showDetailActor, ActorRef settingsActor) {
-        return Props.create(HomeActor.class, () -> new HomeActor(showDetailActor, settingsActor));
+    public static Props props(ActorRef showDetailActor, ActorRef settingActor) {
+        return Props.create(HomeActor.class, () -> new HomeActor(showDetailActor, settingActor));
     }
 }
