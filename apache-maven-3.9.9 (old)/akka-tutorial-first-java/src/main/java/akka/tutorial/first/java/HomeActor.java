@@ -8,16 +8,14 @@ import java.util.Scanner;
 public class HomeActor extends AbstractActor {
     private final ActorRef showDetailActor;
     private final ActorRef settingsActor;
-    private final ActorRef billingActor;
 
-    public HomeActor(ActorRef showDetailActor, ActorRef settingsActor, ActorRef billingActor) {
+    public HomeActor(ActorRef showDetailActor, ActorRef settingsActor) {
         this.showDetailActor = showDetailActor;
         this.settingsActor = settingsActor;
-        this.billingActor = billingActor;
     }
 
-    public static Props props(ActorRef showDetailActor, ActorRef settingsActor, ActorRef billingActor) {
-        return Props.create(HomeActor.class, () -> new HomeActor(showDetailActor, settingsActor, billingActor));
+    public static Props props(ActorRef showDetailActor, ActorRef settingsActor) {
+        return Props.create(HomeActor.class, () -> new HomeActor(showDetailActor, settingsActor));
     }
 
     @Override
@@ -28,7 +26,7 @@ public class HomeActor extends AbstractActor {
     }
 
     private void processMessage(String message) {
-        if (message.equals("home")) {
+        if (message.equals("start")) {
             displayHomeMenu();
         } else {
             System.out.println("Unrecognized message: " + message);
@@ -39,8 +37,7 @@ public class HomeActor extends AbstractActor {
         System.out.println("\n=== Home Menu ===");
         System.out.println("1. Browse Video Recommendations");
         System.out.println("2. Settings");
-        System.out.println("3. Billing");
-        System.out.println("4. Exit");
+        System.out.println("3. Exit");
         System.out.print("Choose an option: ");
 
         Scanner scanner = new Scanner(System.in);
@@ -54,15 +51,12 @@ public class HomeActor extends AbstractActor {
                 settingsActor.tell("open", getSelf());
                 break;
             case 3:
-                billingActor.tell("billing", getSelf());
-                break;
-            case 4:
                 System.out.println("Exiting...");
                 getContext().getSystem().terminate();
                 break;
             default:
                 System.out.println("Invalid choice. Returning to Home Menu.");
-                self().tell("home", getSelf());
+                self().tell("start", getSelf());
                 break;
         }
     }
@@ -89,7 +83,7 @@ public class HomeActor extends AbstractActor {
                 showDetailActor.tell("Documentary C", getSelf());
                 break;
             case 4:
-                self().tell("home", getSelf());
+                self().tell("start", getSelf());
                 break;
             default:
                 System.out.println("Invalid choice. Returning to Video Recommendations.");
