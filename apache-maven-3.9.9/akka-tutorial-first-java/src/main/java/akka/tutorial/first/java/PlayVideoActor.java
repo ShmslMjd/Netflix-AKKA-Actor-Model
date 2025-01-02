@@ -52,9 +52,7 @@ public class PlayVideoActor extends AbstractActor {
             switch (choice) {
                 case 1:
                     System.out.println("Stopping video...");
-                    exitVideo = true;
-                    showDetailActor.tell("showDetail", getSelf());
-                    return;
+                    break;
                 case 2:
                     System.out.println("Rewinding video...");
                     break;
