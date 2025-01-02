@@ -1,9 +1,8 @@
 package akka.tutorial.first.java;
 
 import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
 import akka.actor.Props;
-
+import akka.actor.ActorRef;
 import java.util.Scanner;
 
 public class PlayVideoActor extends AbstractActor {
@@ -55,8 +54,7 @@ public class PlayVideoActor extends AbstractActor {
                     break;
                 case 4:
                     System.out.println("Exiting video player...");
-                    homeActor.tell("start", getSelf());
-                    exitVideo = true;
+                    homeActor.tell("home", getSelf());
                     break;
                 case 5:
                     modifyVolume();

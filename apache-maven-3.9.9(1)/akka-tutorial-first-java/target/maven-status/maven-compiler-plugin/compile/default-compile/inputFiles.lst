@@ -1,9 +1,9 @@
 C:\Netflix-AKKA-Actor-Model\apache-maven-3.9.9\akka-tutorial-first-java\src\main\java\akka\tutorial\first\java\App.java
-C:\Netflix-AKKA-Actor-Model\apache-maven-3.9.9\akka-tutorial-first-java\src\main\java\akka\tutorial\first\java\BillingActor.java
+C:\Netflix-AKKA-Actor-Model\apache-maven-3.9.9\akka-tutorial-first-java\src\main\java\akka\tutorial\first\java\BillActor.java
 C:\Netflix-AKKA-Actor-Model\apache-maven-3.9.9\akka-tutorial-first-java\src\main\java\akka\tutorial\first\java\HomeActor.java
 C:\Netflix-AKKA-Actor-Model\apache-maven-3.9.9\akka-tutorial-first-java\src\main\java\akka\tutorial\first\java\LoginActor.java
 C:\Netflix-AKKA-Actor-Model\apache-maven-3.9.9\akka-tutorial-first-java\src\main\java\akka\tutorial\first\java\PlayVideoActor.java
-C:\Netflix-AKKA-Actor-Model\apache-maven-3.9.9\akka-tutorial-first-java\src\main\java\akka\tutorial\first\java\SettingActor.java
+C:\Netflix-AKKA-Actor-Model\apache-maven-3.9.9\akka-tutorial-first-java\src\main\java\akka\tutorial\first\java\ProfileActor.java
+C:\Netflix-AKKA-Actor-Model\apache-maven-3.9.9\akka-tutorial-first-java\src\main\java\akka\tutorial\first\java\SettingsActor.java
 C:\Netflix-AKKA-Actor-Model\apache-maven-3.9.9\akka-tutorial-first-java\src\main\java\akka\tutorial\first\java\ShowDetailActor.java
 C:\Netflix-AKKA-Actor-Model\apache-maven-3.9.9\akka-tutorial-first-java\src\main\java\akka\tutorial\first\java\SignupActor.java
-C:\Netflix-AKKA-Actor-Model\apache-maven-3.9.9\akka-tutorial-first-java\src\main\java\akka\tutorial\first\java\UserProfileActor.java

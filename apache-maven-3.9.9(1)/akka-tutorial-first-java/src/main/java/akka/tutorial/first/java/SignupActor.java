@@ -30,7 +30,7 @@ public class SignupActor extends AbstractActor {
 
     private void processMessage(String message) {
         if (message.equals("signup")) {
-            System.out.println("\n=== signup ===");
+            System.out.println("=== signup ===");
             handleSignup();
         }
     }

@@ -1,24 +1,23 @@
 package akka.tutorial.first.java;
 
 import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
 import akka.actor.Props;
-
+import akka.actor.ActorRef;
 import java.util.Scanner;
 
 public class HomeActor extends AbstractActor {
     private final ActorRef showDetailActor;
-    private final ActorRef settingActor;
+    private final ActorRef settingsActor;
     private final ActorRef billingActor;
 
-    public HomeActor(ActorRef showDetailActor, ActorRef settingActor, ActorRef billingActor) {
+    public HomeActor(ActorRef showDetailActor, ActorRef settingsActor, ActorRef billingActor) {
         this.showDetailActor = showDetailActor;
-        this.settingActor = settingActor;
+        this.settingsActor = settingsActor;
         this.billingActor = billingActor;
     }
 
-    public static Props props(ActorRef showDetailActor, ActorRef settingActor, ActorRef billingActor) {
-        return Props.create(HomeActor.class, () -> new HomeActor(showDetailActor, settingActor, billingActor));
+    public static Props props(ActorRef showDetailActor, ActorRef settingsActor, ActorRef billingActor) {
+        return Props.create(HomeActor.class, () -> new HomeActor(showDetailActor, settingsActor, billingActor));
     }
 
     @Override
@@ -29,7 +28,7 @@ public class HomeActor extends AbstractActor {
     }
 
     private void processMessage(String message) {
-        if ("start".equalsIgnoreCase(message)) {
+        if (message.equals("home")) {
             displayHomeMenu();
         } else {
             System.out.println("Unrecognized message: " + message);
@@ -37,38 +36,44 @@ public class HomeActor extends AbstractActor {
     }
 
     private void displayHomeMenu() {
-        System.out.println("\n--- Home Menu ---");
-        System.out.println("1. Video Recommendations");
+        System.out.println("\n=== Home Menu ===");
+        System.out.println("1. Browse Video Recommendations");
         System.out.println("2. Settings");
-        System.out.println("3. Exit");
-        System.out.print("Enter your choice: ");
+        System.out.println("3. Billing");
+        System.out.println("4. Exit");
+        System.out.print("Choose an option: ");
 
         Scanner scanner = new Scanner(System.in);
         int choice = scanner.nextInt();
 
         switch (choice) {
             case 1:
-                displayRecommendations();
+                browseVideos();
                 break;
             case 2:
-                settingActor.tell("open", getSelf());
+                settingsActor.tell("open", getSelf());
                 break;
             case 3:
-                System.out.println("Exiting... Goodbye!");
+                billingActor.tell("billing", getSelf());
+                break;
+            case 4:
+                System.out.println("Exiting...");
                 getContext().getSystem().terminate();
                 break;
             default:
-                System.out.println("Invalid choice. Returning to Home Menu...");
-                selfTellStart();
+                System.out.println("Invalid choice. Returning to Home Menu.");
+                self().tell("home", getSelf());
+                break;
         }
     }
 
-    private void displayRecommendations() {
-        System.out.println("\n--- Video Recommendations ---");
+    private void browseVideos() {
+        System.out.println("\n=== Video Recommendations ===");
         System.out.println("1. Movie A");
         System.out.println("2. Series B");
         System.out.println("3. Documentary C");
-        System.out.print("Select a video by entering its number: ");
+        System.out.println("4. Back to Home Menu");
+        System.out.print("Choose a video to watch: ");
 
         Scanner scanner = new Scanner(System.in);
         int choice = scanner.nextInt();
@@ -83,13 +88,13 @@ public class HomeActor extends AbstractActor {
             case 3:
                 showDetailActor.tell("Documentary C", getSelf());
                 break;
+            case 4:
+                self().tell("home", getSelf());
+                break;
             default:
-                System.out.println("Invalid choice. Returning to Home Menu...");
-                selfTellStart();
+                System.out.println("Invalid choice. Returning to Video Recommendations.");
+                browseVideos();
+                break;
         }
-    }
-
-    private void selfTellStart() {
-        getSelf().tell("start", getSelf());
     }
 }

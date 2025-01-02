@@ -26,7 +26,7 @@ public class LoginActor extends AbstractActor {
         return receiveBuilder()
             .match(String.class, message -> {
                 if (message.equals("login")) {
-                    System.out.println("\n=== Login ===");
+                    System.out.println("=====Login=====");
                     handleLogin();
                 }
             })
@@ -42,7 +42,7 @@ public class LoginActor extends AbstractActor {
 
         if (userDatabase.containsKey(username) && userDatabase.get(username).equals(password)) {
             System.out.println("Login successful! Welcome, " + username);
-            homeActor.tell("start", ActorRef.noSender());
+            homeActor.tell("home", ActorRef.noSender());
         } else {
             System.out.println("Invalid username or password. Please try again.");
             appActor.tell("startMenu", ActorRef.noSender());
