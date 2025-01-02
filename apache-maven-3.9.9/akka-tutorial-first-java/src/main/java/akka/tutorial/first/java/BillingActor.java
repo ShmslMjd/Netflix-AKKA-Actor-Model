@@ -84,6 +84,7 @@ public class BillingActor extends AbstractActor {
 
     private void payBills(Scanner scanner) {
         System.out.println("\n--- Pay Bills ---");
+        viewBills();
         System.out.print("Enter Bill ID to pay: ");
         String billId = scanner.nextLine();
         Bill billToPay = null;
