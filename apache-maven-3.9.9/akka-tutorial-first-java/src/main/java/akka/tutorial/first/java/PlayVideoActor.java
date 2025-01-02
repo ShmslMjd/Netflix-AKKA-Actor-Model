@@ -55,8 +55,8 @@ public class PlayVideoActor extends AbstractActor {
                     break;
                 case 4:
                     System.out.println("Exiting video player...");
-                    homeActor.tell("start", getSelf());
                     exitVideo = true;
+                    homeActor.tell("start", getSelf());
                     break;
                 case 5:
                     modifyVolume();
