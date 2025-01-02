@@ -39,7 +39,7 @@ public class PlayVideoActor extends AbstractActor {
             System.out.println("7. Adjust Speed");
             System.out.println("8. Select Subtitles");
             System.out.println("9. Go to Next Episode");
-            System.out.print("Choose an option: ");
+            System.out.print("Choose an option: \n");
             int choice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
 

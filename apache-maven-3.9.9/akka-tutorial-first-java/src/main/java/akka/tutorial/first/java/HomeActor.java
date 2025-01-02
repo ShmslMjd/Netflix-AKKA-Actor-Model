@@ -1,31 +1,28 @@
 package akka.tutorial.first.java;
 
+import java.util.Scanner;
+
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-
-import java.util.Scanner;
+import akka.japi.pf.ReceiveBuilder;
 
 public class HomeActor extends AbstractActor {
     private final ActorRef showDetailActor;
     private final ActorRef settingActor;
-    private final ActorRef billingActor;
 
-    public HomeActor(ActorRef showDetailActor, ActorRef settingActor, ActorRef billingActor) {
+    public HomeActor(ActorRef showDetailActor, ActorRef settingActor) {
         this.showDetailActor = showDetailActor;
         this.settingActor = settingActor;
-        this.billingActor = billingActor;
-    }
-
-    public static Props props(ActorRef showDetailActor, ActorRef settingActor, ActorRef billingActor) {
-        return Props.create(HomeActor.class, () -> new HomeActor(showDetailActor, settingActor, billingActor));
     }
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder()
-                .match(String.class, this::processMessage)
-                .build();
+        return ReceiveBuilder.create()
+            .match(String.class, this::processMessage)
+            .matchEquals("toHomeMenu", msg -> displayHomeMenu())
+            .matchEquals("start", msg -> displayHomeMenu())
+            .build();
     }
 
     private void processMessage(String message) {
@@ -91,5 +88,9 @@ public class HomeActor extends AbstractActor {
 
     private void selfTellStart() {
         getSelf().tell("start", getSelf());
+    }
+
+    public static Props props(ActorRef showDetailActor, ActorRef settingActor) {
+        return Props.create(HomeActor.class, () -> new HomeActor(showDetailActor, settingActor));
     }
 }
