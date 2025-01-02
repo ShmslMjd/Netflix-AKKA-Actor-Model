@@ -1,6 +1,7 @@
 package akka.tutorial.first.java;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
 
@@ -9,12 +10,24 @@ import java.util.Scanner;
 import java.util.Set;
 
 public class ShowDetailActor extends AbstractActor {
-    private final Set<String> likedVideos = new HashSet<>();
-    private final Set<String> userList = new HashSet<>();
+    private final Set<String> likedVideos;
+    private final Set<String> userList;
+    private ActorRef playVideoActor;
+
+    public ShowDetailActor(Set<String> likedVideos, Set<String> userList, ActorRef playVideoActor) {
+        this.likedVideos = likedVideos;
+        this.userList = userList;
+        this.playVideoActor = playVideoActor;
+    }
+
+    public static Props props(Set<String> likedVideos, Set<String> userList, ActorRef playVideoActor) {
+        return Props.create(ShowDetailActor.class, () -> new ShowDetailActor(likedVideos, userList, playVideoActor));
+    }
 
     @Override
     public Receive createReceive() {
         return ReceiveBuilder.create()
+            .match(ActorRef.class, actorRef -> this.playVideoActor = actorRef)
             .match(String.class, this::processShowDetail)
             .build();
     }
@@ -99,8 +112,10 @@ public class ShowDetailActor extends AbstractActor {
     private void playContent(String showName, String episode) {
         if (episode != null) {
             System.out.println("Playing: " + showName + " - " + episode);
+            playVideoActor.tell(showName + " - " + episode, getSelf());
         } else {
             System.out.println("Playing: " + showName);
+            playVideoActor.tell(showName, getSelf());
         }
     }
 
@@ -122,9 +137,5 @@ public class ShowDetailActor extends AbstractActor {
             userList.add(showName);
             System.out.println(showName + " has been added to your watch list.");
         }
-    }
-
-    public static Props props() {
-        return Props.create(ShowDetailActor.class);
     }
 }

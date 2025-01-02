@@ -5,7 +5,9 @@ import akka.actor.ActorSystem;
 import akka.actor.AbstractActor;
 import akka.actor.Props;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Scanner;
 
 public class App extends AbstractActor {
@@ -16,9 +18,10 @@ public class App extends AbstractActor {
 
         // Simulated in-memory user database
         Map<String, String> userDatabase = new HashMap<>();
+        Set<String> likedVideos = new HashSet<>();
+        Set<String> userList = new HashSet<>();
 
         // Initialize dependent actors first
-        ActorRef showDetailActor = akkaSystem.actorOf(ShowDetailActor.props(), "showDetailActor");
         ActorRef userProfileActor = akkaSystem.actorOf(UserProfileActor.props(), "userProfileActor");
         ActorRef billingActor = akkaSystem.actorOf(BillingActor.props(), "billingActor");
 
@@ -26,7 +29,14 @@ public class App extends AbstractActor {
         ActorRef settingActor = akkaSystem.actorOf(SettingActor.props(userProfileActor, billingActor, null), "settingActor");
 
         // Create HomeActor with SettingActor and ShowDetailActor references
+        ActorRef showDetailActor = akkaSystem.actorOf(ShowDetailActor.props(likedVideos, userList, null), "showDetailActor");
         ActorRef homeActor = akkaSystem.actorOf(HomeActor.props(showDetailActor, settingActor), "homeActor");
+
+        // Create PlayVideoActor with HomeActor reference
+        ActorRef playVideoActor = akkaSystem.actorOf(PlayVideoActor.props(homeActor), "playVideoActor");
+
+        // Update ShowDetailActor with PlayVideoActor reference
+        showDetailActor.tell(playVideoActor, ActorRef.noSender());
 
         // Create LoginActor and SignupActor
         ActorRef appActor = akkaSystem.actorOf(Props.create(App.class), "appActor");

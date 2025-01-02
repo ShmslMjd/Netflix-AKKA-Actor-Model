@@ -3,11 +3,11 @@ package akka.tutorial.first.java;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
-
 import java.util.Scanner;
 
 public class PlayVideoActor extends AbstractActor {
     private final ActorRef homeActor;
+    private boolean isPaused = false;
 
     public PlayVideoActor(ActorRef homeActor) {
         this.homeActor = homeActor;
@@ -24,28 +24,36 @@ public class PlayVideoActor extends AbstractActor {
                 .build();
     }
 
-    private void playVideo(String showName) {
+    private void playVideo(String message) {
+        String[] parts = message.split(" - ");
+        String showName = parts[0];
+        String episode = parts.length > 1 ? parts[1] : null;
+
         Scanner scanner = new Scanner(System.in);
         boolean exitVideo = false;
         while (!exitVideo) {
             System.out.println("\n=== Video Player ===");
-            System.out.println("Now Playing: " + showName);
+            System.out.println("Now Playing: " + showName + (episode != null ? " - " + episode : ""));
             System.out.println("1. Stop");
             System.out.println("2. Rewind");
             System.out.println("3. Forward");
-            System.out.println("4. Exit");
-            System.out.println("5. Modify Volume");
-            System.out.println("6. Adjust Brightness");
-            System.out.println("7. Adjust Speed");
-            System.out.println("8. Select Subtitles");
-            System.out.println("9. Go to Next Episode");
-            System.out.print("Choose an option: \n");
+            System.out.println("4. Pause");
+            System.out.println("5. Status");
+            System.out.println("6. Exit");
+            System.out.println("7. Modify Volume");
+            System.out.println("8. Adjust Brightness");
+            System.out.println("9. Adjust Speed");
+            System.out.println("10. Select Subtitles");
+            System.out.println("11. Go to Next Episode");
+            System.out.print("Choose an option: ");
             int choice = scanner.nextInt();
             scanner.nextLine(); // Consume newline
 
             switch (choice) {
                 case 1:
                     System.out.println("Stopping video...");
+                    exitVideo = true;
+                    homeActor.tell("showDetail", getSelf());
                     break;
                 case 2:
                     System.out.println("Rewinding video...");
@@ -54,23 +62,30 @@ public class PlayVideoActor extends AbstractActor {
                     System.out.println("Forwarding video...");
                     break;
                 case 4:
+                    isPaused = !isPaused;
+                    System.out.println(isPaused ? "Video paused." : "Video playing.");
+                    break;
+                case 5:
+                    System.out.println(isPaused ? "Video is currently paused." : "Video is currently playing.");
+                    break;
+                case 6:
                     System.out.println("Exiting video player...");
                     exitVideo = true;
                     homeActor.tell("start", getSelf());
                     break;
-                case 5:
+                case 7:
                     modifyVolume();
                     break;
-                case 6:
+                case 8:
                     adjustBrightness();
                     break;
-                case 7:
+                case 9:
                     adjustSpeed();
                     break;
-                case 8:
+                case 10:
                     selectSubtitles();
                     break;
-                case 9:
+                case 11:
                     goToNextEpisode();
                     break;
                 default:
