@@ -1,12 +1,12 @@
 package akka.tutorial.first.java;
 
-import akka.actor.AbstractActor;
-import akka.actor.Props;
-import akka.japi.pf.ReceiveBuilder;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import akka.actor.AbstractActor;
+import akka.actor.Props;
+import akka.japi.pf.ReceiveBuilder;
 
 public class BillingActor extends AbstractActor {
     private final List<String> transactions = new ArrayList<>();
@@ -60,7 +60,7 @@ public class BillingActor extends AbstractActor {
                 case 5:
                     addPaymentMethod(scanner);
                     break;
-                    case 6:
+                case 6:
                     System.out.println("Returning to Settings Menu...");
                     getSender().tell("open", getSelf()); // Notify SettingActor to redisplay menu
                     return;

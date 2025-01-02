@@ -9,11 +9,19 @@ public class App {
 
         ActorSystem akkaSystem = ActorSystem.create("system");
 
+        // Initialize dependent actors first
         ActorRef showDetailActor = akkaSystem.actorOf(ShowDetailActor.props(), "showDetailActor");
         ActorRef userProfileActor = akkaSystem.actorOf(UserProfileActor.props(), "userProfileActor");
         ActorRef billingActor = akkaSystem.actorOf(BillingActor.props(), "billingActor");
-        ActorRef settingActor = akkaSystem.actorOf(SettingActor.props(userProfileActor, billingActor), "settingActor");
+
+        // Create SettingActor without HomeActor reference
+        ActorRef settingActor = akkaSystem.actorOf(SettingActor.props(userProfileActor, billingActor, null), "settingActor");
+
+        // Create HomeActor with SettingActor and ShowDetailActor references
         ActorRef homeActor = akkaSystem.actorOf(HomeActor.props(showDetailActor, settingActor), "homeActor");
+
+        // Update SettingActor with HomeActor reference
+        settingActor.tell(homeActor, ActorRef.noSender());
 
         // Start the home menu
         homeActor.tell("start", ActorRef.noSender());

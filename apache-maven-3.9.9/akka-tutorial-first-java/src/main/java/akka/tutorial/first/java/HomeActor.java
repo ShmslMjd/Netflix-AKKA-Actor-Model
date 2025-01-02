@@ -1,11 +1,11 @@
 package akka.tutorial.first.java;
 
+import java.util.Scanner;
+
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
-
-import java.util.Scanner;
 
 public class HomeActor extends AbstractActor {
     private final ActorRef showDetailActor;
@@ -20,6 +20,8 @@ public class HomeActor extends AbstractActor {
     public Receive createReceive() {
         return ReceiveBuilder.create()
             .match(String.class, this::processMessage)
+            .matchEquals("toHomeMenu", msg -> displayHomeMenu())
+            .matchEquals("start", msg -> displayHomeMenu())
             .build();
     }
 
