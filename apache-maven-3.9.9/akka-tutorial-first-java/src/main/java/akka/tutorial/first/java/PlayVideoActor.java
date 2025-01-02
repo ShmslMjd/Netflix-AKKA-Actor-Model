@@ -6,15 +6,15 @@ import akka.actor.Props;
 import java.util.Scanner;
 
 public class PlayVideoActor extends AbstractActor {
-    private final ActorRef homeActor;
+    private final ActorRef showDetailActor;
     private boolean isPaused = false;
 
-    public PlayVideoActor(ActorRef homeActor) {
-        this.homeActor = homeActor;
+    public PlayVideoActor(ActorRef showDetailActor) {
+        this.showDetailActor = showDetailActor;
     }
 
-    public static Props props(ActorRef homeActor) {
-        return Props.create(PlayVideoActor.class, () -> new PlayVideoActor(homeActor));
+    public static Props props(ActorRef showDetailActor) {
+        return Props.create(PlayVideoActor.class, () -> new PlayVideoActor(showDetailActor));
     }
 
     @Override
@@ -53,8 +53,8 @@ public class PlayVideoActor extends AbstractActor {
                 case 1:
                     System.out.println("Stopping video...");
                     exitVideo = true;
-                    homeActor.tell("showDetail", getSelf());
-                    break;
+                    showDetailActor.tell("showDetail", getSelf());
+                    return;
                 case 2:
                     System.out.println("Rewinding video...");
                     break;
@@ -71,8 +71,8 @@ public class PlayVideoActor extends AbstractActor {
                 case 6:
                     System.out.println("Exiting video player...");
                     exitVideo = true;
-                    homeActor.tell("start", getSelf());
-                    break;
+                    showDetailActor.tell("start", getSelf());
+                    return;
                 case 7:
                     modifyVolume();
                     break;

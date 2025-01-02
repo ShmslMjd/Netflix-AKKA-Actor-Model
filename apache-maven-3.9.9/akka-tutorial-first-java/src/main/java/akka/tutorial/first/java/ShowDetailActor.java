@@ -13,6 +13,7 @@ public class ShowDetailActor extends AbstractActor {
     private final Set<String> likedVideos;
     private final Set<String> userList;
     private ActorRef playVideoActor;
+    private String currentShowName;
 
     public ShowDetailActor(Set<String> likedVideos, Set<String> userList, ActorRef playVideoActor) {
         this.likedVideos = likedVideos;
@@ -28,11 +29,44 @@ public class ShowDetailActor extends AbstractActor {
     public Receive createReceive() {
         return ReceiveBuilder.create()
             .match(ActorRef.class, actorRef -> this.playVideoActor = actorRef)
+            .matchEquals("showDetail", msg -> displayShowDetail())
             .match(String.class, this::processShowDetail)
             .build();
     }
 
+    private void displayShowDetail() {
+        // Logic to display show details
+        System.out.println("\n--- Details for: " + currentShowName + " ---");
+        System.out.println("1. Play");
+        System.out.println("2. Like");
+        System.out.println("3. Add to Watch List");
+        System.out.println("4. Go Back to Home");
+        System.out.print("Enter your choice: ");
+
+        Scanner scanner = new Scanner(System.in);
+        int choice = scanner.nextInt();
+
+        switch (choice) {
+            case 1:
+                playContent(currentShowName, null);
+                break;
+            case 2:
+                toggleLike(currentShowName);
+                break;
+            case 3:
+                toggleList(currentShowName);
+                break;
+            case 4:
+                getSender().tell("start", getSelf());
+                break;
+            default:
+                System.out.println("Invalid choice. Try again.");
+                displayShowDetail();
+        }
+    }
+
     private void processShowDetail(String showName) {
+        this.currentShowName = showName;
         boolean isTvShow = isTvShow(showName);
 
         String selectedEpisode = null;
@@ -65,7 +99,7 @@ public class ShowDetailActor extends AbstractActor {
             switch (choice) {
                 case 1:
                     playContent(showName, selectedEpisode);
-                    break;
+                    return; // Exit loop and return to PlayVideoActor
                 case 2:
                     toggleLike(showName);
                     break;

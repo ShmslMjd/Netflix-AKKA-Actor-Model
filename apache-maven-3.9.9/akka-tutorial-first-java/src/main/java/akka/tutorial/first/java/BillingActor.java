@@ -1,36 +1,37 @@
 package akka.tutorial.first.java;
 
+import akka.actor.AbstractActor;
+import akka.actor.Props;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import akka.actor.AbstractActor;
-import akka.actor.Props;
-import akka.japi.pf.ReceiveBuilder;
-
 public class BillingActor extends AbstractActor {
-    private final List<String> transactions = new ArrayList<>();
+    private final List<Bill> bills = new ArrayList<>();
+    private final List<Transaction> transactions = new ArrayList<>();
     private String paymentMethod = "None";
+
+    public BillingActor() {
+        // Initialize with some sample bills
+        bills.add(new Bill("1", 10.99));
+        bills.add(new Bill("2", 15.99));
+    }
+
+    public static Props props() {
+        return Props.create(BillingActor.class, BillingActor::new);
+    }
 
     @Override
     public Receive createReceive() {
-        return ReceiveBuilder.create()
-            .match(String.class, this::processCommand)
-            .build();
-    }
-
-    private void processCommand(String command) {
-        switch (command.toLowerCase()) {
-            case "manage":
-                manageBilling();
-                break;
-            default:
-                System.out.println("Invalid command.");
-        }
+        return receiveBuilder()
+                .matchEquals("manage", msg -> manageBilling())
+                .build();
     }
 
     private void manageBilling() {
-        while (true) {
+        Scanner scanner = new Scanner(System.in);
+        boolean exitMenu = false;
+        while (!exitMenu) {
             System.out.println("\n--- Billing Menu ---");
             System.out.println("1. View Bills");
             System.out.println("2. Pay Bills");
@@ -40,9 +41,8 @@ public class BillingActor extends AbstractActor {
             System.out.println("6. Back to Settings Menu");
             System.out.print("Enter your choice: ");
 
-            Scanner scanner = new Scanner(System.in);
             int choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline.
+            scanner.nextLine(); // Consume newline
 
             switch (choice) {
                 case 1:
@@ -63,7 +63,8 @@ public class BillingActor extends AbstractActor {
                 case 6:
                     System.out.println("Returning to Settings Menu...");
                     getSender().tell("open", getSelf()); // Notify SettingActor to redisplay menu
-                    return;
+                    exitMenu = true;
+                    break;
                 default:
                     System.out.println("Invalid choice. Try again.");
             }
@@ -72,40 +73,144 @@ public class BillingActor extends AbstractActor {
 
     private void viewBills() {
         System.out.println("\n--- Your Bills ---");
-        System.out.println("Bill #1: $10.99 - Due");
-        System.out.println("Bill #2: $15.99 - Paid");
+        if (bills.isEmpty()) {
+            System.out.println("No bills available.");
+        } else {
+            for (Bill bill : bills) {
+                System.out.println(bill);
+            }
+        }
     }
 
     private void payBills(Scanner scanner) {
-        System.out.print("Enter the amount to pay: ");
-        double amount = scanner.nextDouble();
-        scanner.nextLine(); // Consume newline.
-        System.out.println("Paid $" + amount + " successfully.");
-        transactions.add("Paid $" + amount);
+        System.out.println("\n--- Pay Bills ---");
+        System.out.print("Enter Bill ID to pay: ");
+        String billId = scanner.nextLine();
+        Bill billToPay = null;
+        for (Bill bill : bills) {
+            if (bill.getId().equals(billId)) {
+                billToPay = bill;
+                break;
+            }
+        }
+        if (billToPay != null) {
+            if ("None".equals(paymentMethod)) {
+                System.out.println("No payment method set. Please set a payment method first.");
+            } else {
+                billToPay.setPaid(true);
+                transactions.add(new Transaction(billToPay.getId(), billToPay.getAmount(), paymentMethod));
+                System.out.println("Bill " + billId + " has been paid using " + paymentMethod + ".");
+            }
+        } else {
+            System.out.println("Bill ID not found.");
+        }
     }
 
     private void viewTransactionHistory() {
         System.out.println("\n--- Transaction History ---");
         if (transactions.isEmpty()) {
-            System.out.println("No transactions yet.");
+            System.out.println("No transactions available.");
         } else {
-            transactions.forEach(System.out::println);
+            for (Transaction transaction : transactions) {
+                System.out.println(transaction);
+            }
         }
     }
 
     private void setPaymentMethod(Scanner scanner) {
-        System.out.print("Enter payment method to set (e.g., Credit Card): ");
-        paymentMethod = scanner.nextLine();
-        System.out.println("Payment method set to: " + paymentMethod);
+        System.out.println("\n--- Set Payment Method ---");
+        System.out.println("1. Credit Card");
+        System.out.println("2. Bank Transfer");
+        System.out.print("Choose a payment method: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        switch (choice) {
+            case 1:
+                paymentMethod = "Credit Card";
+                break;
+            case 2:
+                paymentMethod = "Bank Transfer";
+                break;
+            default:
+                System.out.println("Invalid choice. Payment method not set.");
+                return;
+        }
+        System.out.println("Payment method set to " + paymentMethod);
     }
 
     private void addPaymentMethod(Scanner scanner) {
-        System.out.print("Enter new payment method to add: ");
-        String newMethod = scanner.nextLine();
-        System.out.println("Added new payment method: " + newMethod);
+        System.out.println("\n--- Add Payment Method ---");
+        System.out.println("1. Credit Card");
+        System.out.println("2. Bank Transfer");
+        System.out.print("Choose a payment method to add: ");
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        switch (choice) {
+            case 1:
+                System.out.print("Enter Credit Card details: ");
+                String creditCardDetails = scanner.nextLine();
+                System.out.println("Credit Card " + creditCardDetails + " has been added.");
+                break;
+            case 2:
+                System.out.print("Enter Bank Transfer details: ");
+                String bankTransferDetails = scanner.nextLine();
+                System.out.println("Bank Transfer " + bankTransferDetails + " has been added.");
+                break;
+            default:
+                System.out.println("Invalid choice. Payment method not added.");
+        }
     }
 
-    public static Props props() {
-        return Props.create(BillingActor.class);
+    // Inner classes for Bill and Transaction
+    private static class Bill {
+        private final String id;
+        private final double amount;
+        private boolean isPaid;
+
+        public Bill(String id, double amount) {
+            this.id = id;
+            this.amount = amount;
+            this.isPaid = false;
+        }
+
+        public String getId() {
+            return id;
+        }
+
+        public double getAmount() {
+            return amount;
+        }
+
+        public boolean isPaid() {
+            return isPaid;
+        }
+
+        public void setPaid(boolean paid) {
+            isPaid = paid;
+        }
+
+        @Override
+        public String toString() {
+            return "Bill ID: " + id + ", Amount: $" + amount + ", Status: " + (isPaid ? "Paid" : "Due");
+        }
+    }
+
+    private static class Transaction {
+        private final String billId;
+        private final double amount;
+        private final String paymentMethod;
+
+        public Transaction(String billId, double amount, String paymentMethod) {
+            this.billId = billId;
+            this.amount = amount;
+            this.paymentMethod = paymentMethod;
+        }
+
+        @Override
+        public String toString() {
+            return "Transaction for Bill ID: " + billId + ", Amount: $" + amount + ", Payment Method: " + paymentMethod;
+        }
     }
 }
