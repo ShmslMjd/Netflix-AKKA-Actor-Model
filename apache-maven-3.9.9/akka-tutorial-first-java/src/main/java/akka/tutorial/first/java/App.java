@@ -10,8 +10,10 @@ public class App {
         ActorSystem akkaSystem = ActorSystem.create("system");
 
         ActorRef showDetailActor = akkaSystem.actorOf(ShowDetailActor.props(), "showDetailActor");
-        ActorRef settingsActor = akkaSystem.actorOf(SettingActor.props(), "settingsActor");
-        ActorRef homeActor = akkaSystem.actorOf(HomeActor.props(showDetailActor, settingsActor), "homeActor");
+        ActorRef userProfileActor = akkaSystem.actorOf(UserProfileActor.props(), "userProfileActor");
+        ActorRef billingActor = akkaSystem.actorOf(BillingActor.props(), "billingActor");
+        ActorRef settingActor = akkaSystem.actorOf(SettingActor.props(userProfileActor, billingActor), "settingActor");
+        ActorRef homeActor = akkaSystem.actorOf(HomeActor.props(showDetailActor, settingActor), "homeActor");
 
         // Start the home menu
         homeActor.tell("start", ActorRef.noSender());
