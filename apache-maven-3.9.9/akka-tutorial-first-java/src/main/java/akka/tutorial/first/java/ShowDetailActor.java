@@ -1,25 +1,71 @@
 package akka.tutorial.first.java;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.Props;
 import akka.japi.pf.ReceiveBuilder;
 
-import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
 public class ShowDetailActor extends AbstractActor {
-    private final Set<String> likedVideos = new HashSet<>();
-    private final Set<String> userList = new HashSet<>();
+    private final Set<String> likedVideos;
+    private final Set<String> userList;
+    private ActorRef playVideoActor;
+    private String currentShowName;
+
+    public ShowDetailActor(Set<String> likedVideos, Set<String> userList, ActorRef playVideoActor) {
+        this.likedVideos = likedVideos;
+        this.userList = userList;
+        this.playVideoActor = playVideoActor;
+    }
+
+    public static Props props(Set<String> likedVideos, Set<String> userList, ActorRef playVideoActor) {
+        return Props.create(ShowDetailActor.class, () -> new ShowDetailActor(likedVideos, userList, playVideoActor));
+    }
 
     @Override
     public Receive createReceive() {
         return ReceiveBuilder.create()
+            .match(ActorRef.class, actorRef -> this.playVideoActor = actorRef)
+            .matchEquals("showDetail", msg -> displayShowDetail())
             .match(String.class, this::processShowDetail)
             .build();
     }
 
+    private void displayShowDetail() {
+        // Logic to display show details
+        System.out.println("\n--- Details for: " + currentShowName + " ---");
+        System.out.println("1. Play");
+        System.out.println("2. Like");
+        System.out.println("3. Add to Watch List");
+        System.out.println("4. Go Back to Home");
+        System.out.print("Enter your choice: ");
+
+        Scanner scanner = new Scanner(System.in);
+        int choice = scanner.nextInt();
+
+        switch (choice) {
+            case 1:
+                playContent(currentShowName, null);
+                break;
+            case 2:
+                toggleLike(currentShowName);
+                break;
+            case 3:
+                toggleList(currentShowName);
+                break;
+            case 4:
+                getSender().tell("start", getSelf());
+                break;
+            default:
+                System.out.println("Invalid choice. Try again.");
+                displayShowDetail();
+        }
+    }
+
     private void processShowDetail(String showName) {
+        this.currentShowName = showName;
         boolean isTvShow = isTvShow(showName);
 
         String selectedEpisode = null;
@@ -52,7 +98,7 @@ public class ShowDetailActor extends AbstractActor {
             switch (choice) {
                 case 1:
                     playContent(showName, selectedEpisode);
-                    break;
+                    return; // Exit loop and return to PlayVideoActor
                 case 2:
                     toggleLike(showName);
                     break;
@@ -99,8 +145,10 @@ public class ShowDetailActor extends AbstractActor {
     private void playContent(String showName, String episode) {
         if (episode != null) {
             System.out.println("Playing: " + showName + " - " + episode);
+            playVideoActor.tell(showName + " - " + episode, getSelf());
         } else {
             System.out.println("Playing: " + showName);
+            playVideoActor.tell(showName, getSelf());
         }
     }
 
@@ -122,9 +170,5 @@ public class ShowDetailActor extends AbstractActor {
             userList.add(showName);
             System.out.println(showName + " has been added to your watch list.");
         }
-    }
-
-    public static Props props() {
-        return Props.create(ShowDetailActor.class);
     }
 }

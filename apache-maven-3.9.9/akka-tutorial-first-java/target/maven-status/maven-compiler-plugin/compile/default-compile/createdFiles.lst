@@ -1,6 +1,11 @@
+akka\tutorial\first\java\BillingActor$Transaction.class
 akka\tutorial\first\java\ShowDetailActor.class
+akka\tutorial\first\java\SignupActor.class
 akka\tutorial\first\java\BillingActor.class
+akka\tutorial\first\java\App.class
+akka\tutorial\first\java\PlayVideoActor.class
+akka\tutorial\first\java\HomeActor.class
+akka\tutorial\first\java\BillingActor$Bill.class
 akka\tutorial\first\java\UserProfileActor.class
 akka\tutorial\first\java\SettingActor.class
-akka\tutorial\first\java\App.class
-akka\tutorial\first\java\HomeActor.class
+akka\tutorial\first\java\LoginActor.class
